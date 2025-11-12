@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package weather.v1;
+
+// Weather service provides forecast and current weather data.
+service Weather {
+    rpc GetWeatherInfo (WeatherRequest) returns (WeatherResponse) {}
+}
+
+// Input: city name for which to fetch weather data.
+message WeatherRequest {
+    string city_name = 1;
+}
+
+// Output: weather data for a city.
+message WeatherResponse {
+    string city_name = 1;
+    int32 temperature = 2;
+    string weather_description = 3;
+    int32 humidity_percent = 4;
+    int32 wind_speed = 5;
+}
