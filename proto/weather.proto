@@ -15,8 +15,8 @@ message WeatherRequest {
 // Output: weather data for a city.
 message WeatherResponse {
     string city_name = 1;
-    int32 temperature = 2;
+    double temperature = 2;
     string weather_description = 3;
     int32 humidity_percent = 4;
-    int32 wind_speed = 5;
+    double wind_speed = 5;
 }
