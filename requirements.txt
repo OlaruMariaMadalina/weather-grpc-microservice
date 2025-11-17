@@ -1,2 +1,5 @@
 grpcio
 grpcio-tools
+python-dotenv
+asyncio
+httpx
