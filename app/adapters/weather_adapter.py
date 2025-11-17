@@ -1,5 +1,11 @@
 import httpx
 from app.config import OPEN_WEATHER_API_KEY
+from app.exceptions.weather_exceptions import (
+    CityNotFoundError,
+    InvalidUpstreamApiKeyError,
+    UpstreamUnavailableError,
+    UpstreamBadResponseError,
+)
 
 class WeatherAdapter:
     """
@@ -31,12 +37,20 @@ class WeatherAdapter:
                 response = await client.get(self.BASE_URL, params=params)
                 response.raise_for_status()
                 return response.json()
-            except httpx.HTTPError as e:
-                if e.response.status_code == 404:
-                    raise ValueError(f"City '{city}' not found in OpenWeather API")
-                elif e.response.status_code == 401:
-                    raise ValueError("Invalid or missing API key for OpenWeather API")
+            
+            except httpx.HTTPStatusError as e:
+                status = e.response.status_code
+
+                if status == 404:
+                    raise CityNotFoundError(city)
+                elif status == 401:
+                    raise InvalidUpstreamApiKeyError()
+                elif 500 <= status < 600:
+                    raise UpstreamUnavailableError(f"Weather API returned {status}")
                 else:
-                    raise RuntimeError(f"OpenWeather API returned {e.response.status_code} error: {e.response.text}")
+                    raise UpstreamBadResponseError(
+                        f"Unexpected response {status}: {e.response.text[:200]}"
+                    )
+
             except httpx.RequestError as e:
-                raise ConnectionError(f"Error connecting to OpenWeather API: {str(e)}")
+                raise UpstreamUnavailableError(f"Connection error: {str(e)}")
